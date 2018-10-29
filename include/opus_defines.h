@@ -70,6 +70,12 @@ extern "C" {
 #  else
 #   define OPUS_EXPORT
 #  endif
+# elif defined __OS2__ && defined __WATCOMC__
+#  if defined OPUS_BUILD && defined __SW_BD
+#   define OPUS_EXPORT __declspec(dllexport)
+#  else
+#   define OPUS_EXPORT
+#  endif
 # elif defined(__GNUC__) && defined(OPUS_BUILD)
 #  define OPUS_EXPORT __attribute__ ((visibility ("default")))
 # else
@@ -86,7 +92,13 @@ extern "C" {
 #  endif
 # endif
 
-#if (!defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L) )
+#if defined(__WATCOMC__)
+# if (__WATCOMC__ >= 1250)
+#  define OPUS_RESTRICT __restrict
+# else
+#  define OPUS_RESTRICT
+# endif
+#elif (!defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L) )
 # if OPUS_GNUC_PREREQ(3,0)
 #  define OPUS_RESTRICT __restrict__
 # elif (defined(_MSC_VER) && _MSC_VER >= 1400)
