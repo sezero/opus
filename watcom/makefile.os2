@@ -1,6 +1,9 @@
 # Uncomment this for fixed-point build
 #FIXED_POINT=1
 
+# Uncomment this to include the opus encoder
+#USE_ENCODER=1
+
 CPPFLAGS=-DOPUS_BUILD -DUSE_ALLOCA -DHAVE_ALLOCA_H -DHAVE_STDINT_H
 #CPPFLAGS+= -DCUSTOM_MODES
 #CPPFLAGS+= -DENABLE_ASSERTIONS
@@ -35,11 +38,17 @@ BLD_TARGET=$(DLLNAME)
 !include celt_sources.mk
 !include opus_sources.mk
 
+!ifdef USE_ENCODER
+CPPFLAGS+= -DOPUS_ENABLE_ENCODER
+CELT_OBJS+= $(CELT_OBJS_ENC)
+SILK_OBJS+= $(SILK_OBJS_ENC)
+OPUS_OBJS+= $(OPUS_OBJS_ENC)
 !ifdef FIXED_POINT
 SILK_OBJS+= $(SILK_OBJS_FIXED)
 !else
 SILK_OBJS+= $(SILK_OBJS_FLOAT)
 OPUS_OBJS+= $(OPUS_OBJS_FLOAT)
+!endif
 !endif
 
 ASM_OBJS =

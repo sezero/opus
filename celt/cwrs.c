@@ -587,6 +587,7 @@ void get_required_bits(opus_int16 *_bits,int _n,int _maxk,int _frac){
 }
 #endif /* CUSTOM_MODES */
 
+#ifdef OPUS_ENABLE_ENCODER
 void encode_pulses(const int *_y,int _n,int _k,ec_enc *_enc){
   opus_uint32 i;
   celt_assert(_k>0);
@@ -620,6 +621,7 @@ void encode_pulses(const int *_y,int _n,int _k,ec_enc *_enc){
   }
 #endif
 }
+#endif /* OPUS_ENABLE_ENCODER */
 
 void decode_pulses(int *_y,int _n,int _k,ec_dec *_dec)
 {

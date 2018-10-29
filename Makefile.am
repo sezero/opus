@@ -10,10 +10,15 @@ include celt_sources.mk
 include silk_sources.mk
 include opus_sources.mk
 
+if USE_ENCODER
+CELT_SOURCES += $(CELT_SOURCES_ENC)
+SILK_SOURCES += $(SILK_SOURCES_ENC)
+OPUS_SOURCES += $(OPUS_SOURCES_ENC)
 if FIXED_POINT
 SILK_SOURCES += $(SILK_SOURCES_FIXED)
 else
 SILK_SOURCES += $(SILK_SOURCES_FLOAT)
+endif
 endif
 
 include celt_headers.mk
@@ -27,6 +32,8 @@ pkginclude_HEADERS = include/opus.h include/opus_multistream.h include/opus_type
 
 noinst_HEADERS = $(OPUS_HEAD) $(SILK_HEAD) $(CELT_HEAD)
 
+# many demo/test programs rely on encoder, ifdef is a lazy way around
+if USE_ENCODER
 noinst_PROGRAMS = opus_demo repacketizer_demo opus_compare tests/test_opus_api tests/test_opus_encode tests/test_opus_decode celt/tests/test_unit_cwrs32 celt/tests/test_unit_dft celt/tests/test_unit_entropy celt/tests/test_unit_laplace celt/tests/test_unit_mathops celt/tests/test_unit_mdct celt/tests/test_unit_rotation celt/tests/test_unit_types
 
 TESTS = celt/tests/test_unit_types celt/tests/test_unit_mathops celt/tests/test_unit_entropy celt/tests/test_unit_laplace celt/tests/test_unit_dft celt/tests/test_unit_mdct celt/tests/test_unit_rotation celt/tests/test_unit_cwrs32 tests/test_opus_api tests/test_opus_decode tests/test_opus_encode
@@ -80,6 +87,7 @@ pkginclude_HEADERS += include/opus_custom.h
 noinst_PROGRAMS += opus_custom_demo
 opus_custom_demo_SOURCES = celt/opus_custom_demo.c
 opus_custom_demo_LDADD = libopus.la -lm
+endif
 endif
 
 EXTRA_DIST = version.mk \

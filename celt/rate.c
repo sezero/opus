@@ -343,6 +343,7 @@ static inline int interp_bits2pulses(const CELTMode *m, int start, int end, int 
         This ensures that we have enough bits to code the skip flag.*/
       if (band_bits >= IMAX(thresh[j], alloc_floor+(1<<BITRES)))
       {
+         #ifdef OPUS_ENABLE_ENCODER
          if (encode)
          {
             /*This if() block is the only part of the allocation function that
@@ -360,7 +361,9 @@ static inline int interp_bits2pulses(const CELTMode *m, int start, int end, int 
                break;
             }
             ec_enc_bit_logp(ec, 0, 1);
-         } else if (ec_dec_bit_logp(ec, 1)) {
+         } else
+         #endif /* OPUS_ENABLE_ENCODER */
+         if (ec_dec_bit_logp(ec, 1)) {
             break;
          }
          /*We used a bit to skip this band.*/
@@ -387,12 +390,14 @@ static inline int interp_bits2pulses(const CELTMode *m, int start, int end, int 
    /* Code the intensity and dual stereo parameters. */
    if (intensity_rsv > 0)
    {
+      #ifdef OPUS_ENABLE_ENCODER
       if (encode)
       {
          *intensity = IMIN(*intensity, codedBands);
          ec_enc_uint(ec, *intensity-start, codedBands+1-start);
       }
       else
+      #endif
          *intensity = start+ec_dec_uint(ec, codedBands+1-start);
    }
    else
@@ -404,9 +409,11 @@ static inline int interp_bits2pulses(const CELTMode *m, int start, int end, int 
    }
    if (dual_stereo_rsv > 0)
    {
+      #ifdef OPUS_ENABLE_ENCODER
       if (encode)
          ec_enc_bit_logp(ec, *dual_stereo, 1);
       else
+      #endif
          *dual_stereo = ec_dec_bit_logp(ec, 1);
    }
    else

@@ -135,6 +135,7 @@ static int resampling_factor(opus_int32 rate)
    return ret;
 }
 
+#ifdef OPUS_ENABLE_ENCODER
 /** Encoder state
  @brief Encoder state
  */
@@ -282,6 +283,7 @@ OPUS_CUSTOM_NOSTATIC int opus_custom_encoder_init(CELTEncoder *st, const CELTMod
 
    return OPUS_OK;
 }
+#endif /* OPUS_ENABLE_ENCODER */
 
 #ifdef CUSTOM_MODES
 void opus_custom_encoder_destroy(CELTEncoder *st)
@@ -302,6 +304,7 @@ static inline opus_val16 SIG2WORD16(celt_sig x)
 #endif
 }
 
+#ifdef OPUS_ENABLE_ENCODER
 static int transient_analysis(const opus_val32 * OPUS_RESTRICT in, int len, int C,
                               int overlap)
 {
@@ -419,6 +422,7 @@ static void compute_mdcts(const CELTMode *mode, int shortBlocks, celt_sig * OPUS
       } while (++c<C);
    }
 }
+#endif /* OPUS_ENABLE_ENCODER */
 
 /** Compute the IMDCT and apply window for all sub-frames and
     all channels in a frame */
@@ -545,6 +549,7 @@ static const signed char tf_select_table[4][8] = {
       {0, -2, 0, -3,    3, 0, 1,-1},
 };
 
+#ifdef OPUS_ENABLE_ENCODER
 static opus_val32 l1_metric(const celt_norm *tmp, int N, int LM, int width)
 {
    int i, j;
@@ -746,6 +751,7 @@ static void tf_encode(int start, int end, int isTransient, int *tf_res, int LM, 
       tf_res[i] = tf_select_table[LM][4*isTransient+2*tf_select+tf_res[i]];
    /*printf("%d %d ", isTransient, tf_select); for(i=0;i<end;i++)printf("%d ", tf_res[i]);printf("\n");*/
 }
+#endif /* OPUS_ENABLE_ENCODER */
 
 static void tf_decode(int start, int end, int isTransient, int *tf_res, int LM, ec_dec *dec)
 {
@@ -797,6 +803,7 @@ static void init_caps(const CELTMode *m,int *cap,int LM,int C)
    }
 }
 
+#ifdef OPUS_ENABLE_ENCODER
 static int alloc_trim_analysis(const CELTMode *m, const celt_norm *X,
       const opus_val16 *bandLogE, int end, int LM, int C, int N0)
 {
@@ -1912,6 +1919,7 @@ bad_request:
    va_end(ap);
    return OPUS_UNIMPLEMENTED;
 }
+#endif /* OPUS_ENABLE_ENCODER */
 
 /**********************************************************************/
 /*                                                                    */

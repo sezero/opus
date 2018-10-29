@@ -48,6 +48,7 @@ static unsigned ec_laplace_get_freq1(unsigned fs0, int decay)
    return ft*(opus_int32)(16384-decay)>>15;
 }
 
+#ifdef OPUS_ENABLE_ENCODER
 void ec_laplace_encode(ec_enc *enc, int *value, unsigned fs, int decay)
 {
    unsigned fl;
@@ -90,6 +91,7 @@ void ec_laplace_encode(ec_enc *enc, int *value, unsigned fs, int decay)
    }
    ec_encode_bin(enc, fl, fl+fs, 15);
 }
+#endif /* OPUS_ENABLE_ENCODER */
 
 int ec_laplace_decode(ec_dec *dec, unsigned fs, int decay)
 {

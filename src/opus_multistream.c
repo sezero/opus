@@ -50,6 +50,7 @@ typedef struct {
    unsigned char mapping[8];
 } VorbisLayout;
 
+#ifdef OPUS_ENABLE_ENCODER
 /* Index is nb_channel-1*/
 static const VorbisLayout vorbis_mappings[8] = {
       {1, 0, {0}},                      /* 1: mono */
@@ -69,6 +70,7 @@ struct OpusMSEncoder {
    int lfe_stream;
    /* Encoder states go here */
 };
+#endif /* OPUS_ENABLE_ENCODER */
 
 struct OpusMSDecoder {
    ChannelLayout layout;
@@ -133,6 +135,7 @@ static int get_mono_channel(const ChannelLayout *layout, int stream_id, int prev
    return -1;
 }
 
+#ifdef OPUS_ENABLE_ENCODER
 static int validate_encoder_layout(const ChannelLayout *layout)
 {
    int s;
@@ -832,6 +835,7 @@ void opus_multistream_encoder_destroy(OpusMSEncoder *st)
 {
     opus_free(st);
 }
+#endif /* OPUS_ENABLE_ENCODER */
 
 
 /* DECODER */

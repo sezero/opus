@@ -295,6 +295,7 @@ void anti_collapse(const CELTMode *m, celt_norm *X_, unsigned char *collapse_mas
    }
 }
 
+#ifdef OPUS_ENABLE_ENCODER
 static void intensity_stereo(const CELTMode *m, celt_norm *X, celt_norm *Y, const celt_ener *bandE, int bandID, int N)
 {
    int i = bandID;
@@ -332,6 +333,7 @@ static void stereo_split(celt_norm *X, celt_norm *Y, int N)
       Y[j] = r-l;
    }
 }
+#endif /* OPUS_ENABLE_ENCODER */
 
 static void stereo_merge(celt_norm *X, celt_norm *Y, opus_val16 mid, int N)
 {
@@ -675,11 +677,14 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
          int sign=0;
          if (*remaining_bits>=1<<BITRES)
          {
+            #ifdef OPUS_ENABLE_ENCODER
             if (encode)
             {
                sign = x[0]<0;
                ec_enc_bits(ec, sign, 1);
-            } else {
+            } else
+            #endif
+            {
                sign = ec_dec_bits(ec, 1);
             }
             *remaining_bits -= 1<<BITRES;
@@ -714,8 +719,10 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
          static const unsigned char bit_interleave_table[16]={
            0,1,1,1,2,3,3,3,2,3,3,3,2,3,3,3
          };
+         #ifdef OPUS_ENABLE_ENCODER
          if (encode)
             haar1(X, N>>k, 1<<k);
+         #endif
          if (lowband)
             haar1(lowband, N>>k, 1<<k);
          fill = bit_interleave_table[fill&0xF]|bit_interleave_table[fill>>4]<<2;
@@ -726,8 +733,10 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
       /* Increasing the time resolution */
       while ((N_B&1) == 0 && tf_change<0)
       {
+         #ifdef OPUS_ENABLE_ENCODER
          if (encode)
             haar1(X, N_B, B);
+         #endif
          if (lowband)
             haar1(lowband, N_B, B);
          fill |= fill<<B;
@@ -742,8 +751,10 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
       /* Reorganize the samples in time order instead of frequency order */
       if (B0>1)
       {
+         #ifdef OPUS_ENABLE_ENCODER
          if (encode)
             deinterleave_hadamard(X, N_B>>recombine, B0<<recombine, longBlocks);
+         #endif
          if (lowband)
             deinterleave_hadamard(lowband, N_B>>recombine, B0<<recombine, longBlocks);
       }
@@ -779,6 +790,7 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
       qn = compute_qn(N, b, offset, pulse_cap, stereo);
       if (stereo && i>=intensity)
          qn = 1;
+      #ifdef OPUS_ENABLE_ENCODER
       if (encode)
       {
          /* theta is the atan() of the ratio between the (normalized)
@@ -787,11 +799,14 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
             2) they are orthogonal. */
          itheta = stereo_itheta(X, Y, stereo, N);
       }
+      #endif
       tell = ec_tell_frac(ec);
       if (qn!=1)
       {
+         #ifdef OPUS_ENABLE_ENCODER
          if (encode)
             itheta = (itheta*qn+8192)>>14;
+         #endif
 
          /* Entropy coding of the angle. We use a uniform pdf for the
             time split, a step for stereo, and a triangular one for the rest. */
@@ -802,10 +817,13 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
             int x0 = qn/2;
             int ft = p0*(x0+1) + x0;
             /* Use a probability of p0 up to itheta=8192 and then use 1 after */
+            #ifdef OPUS_ENABLE_ENCODER
             if (encode)
             {
                ec_encode(ec,x<=x0?p0*x:(x-1-x0)+(x0+1)*p0,x<=x0?p0*(x+1):(x-x0)+(x0+1)*p0,ft);
-            } else {
+            } else
+            #endif
+            {
                int fs;
                fs=ec_decode(ec,ft);
                if (fs<(x0+1)*p0)
@@ -817,13 +835,16 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
             }
          } else if (B0>1 || stereo) {
             /* Uniform pdf */
+            #ifdef OPUS_ENABLE_ENCODER
             if (encode)
                ec_enc_uint(ec, itheta, qn+1);
             else
+            #endif
                itheta = ec_dec_uint(ec, qn+1);
          } else {
             int fs=1, ft;
             ft = ((qn>>1)+1)*((qn>>1)+1);
+            #ifdef OPUS_ENABLE_ENCODER
             if (encode)
             {
                int fl;
@@ -833,7 +854,9 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
                 ft - ((qn + 1 - itheta)*(qn + 2 - itheta)>>1);
 
                ec_encode(ec, fl, fl+fs, ft);
-            } else {
+            } else
+            #endif
+            {
                /* Triangular pdf */
                int fl=0;
                int fm;
@@ -857,6 +880,7 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
             }
          }
          itheta = (opus_int32)itheta*16384/qn;
+         #ifdef OPUS_ENABLE_ENCODER
          if (encode && stereo)
          {
             if (itheta==0)
@@ -864,9 +888,11 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
             else
                stereo_split(X, Y, N);
          }
+         #endif
          /* NOTE: Renormalising X and Y *may* help fixed-point a bit at very high rate.
                   Let's do that at higher complexity */
       } else if (stereo) {
+         #ifdef OPUS_ENABLE_ENCODER
          if (encode)
          {
             inv = itheta > 8192;
@@ -878,11 +904,14 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
             }
             intensity_stereo(m, X, Y, bandE, i, N);
          }
+         #endif
          if (b>2<<BITRES && *remaining_bits > 2<<BITRES)
          {
+            #ifdef OPUS_ENABLE_ENCODER
             if (encode)
                ec_enc_bit_logp(ec, inv, 2);
             else
+            #endif
                inv = ec_dec_bit_logp(ec, 2);
          } else
             inv = 0;
@@ -941,12 +970,15 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
          y2 = c ? X : Y;
          if (sbits)
          {
+            #ifdef OPUS_ENABLE_ENCODER
             if (encode)
             {
                /* Here we only need to encode a sign for the side */
                sign = x2[0]*y2[1] - x2[1]*y2[0] < 0;
                ec_enc_bits(ec, sign, 1);
-            } else {
+            } else
+            #endif
+            {
                sign = ec_dec_bits(ec, 1);
             }
          }
@@ -1057,6 +1089,7 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
          int K = get_pulses(q);
 
          /* Finally do the actual quantization */
+         #ifdef OPUS_ENABLE_ENCODER
          if (encode)
          {
             cm = alg_quant(X, N, K, spread, B, ec
@@ -1064,7 +1097,9 @@ static unsigned quant_band(int encode, const CELTMode *m, int i, celt_norm *X, c
                  , gain
 #endif
                  );
-         } else {
+         } else
+         #endif
+         {
             cm = alg_unquant(X, N, K, spread, B, ec, gain);
          }
       } else {

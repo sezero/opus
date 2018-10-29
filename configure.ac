@@ -180,6 +180,13 @@ if test "$HAVE_DOXYGEN" != "yes" -o "$ac_enable_doc" != "yes"; then
 fi
 AM_CONDITIONAL(HAVE_DOXYGEN, [test $HAVE_DOXYGEN = yes])
 
+ac_enable_encoder="no";
+AC_ARG_ENABLE(encoder, [  --enable-encoder           compile with encoder support],
+[if test "$enableval" = yes; then
+  ac_enable_encoder="yes";
+  AC_DEFINE([OPUS_ENABLE_ENCODER], [1], [Compile with encoder support])
+fi])
+
 saved_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -fvisibility=hidden"
 AC_MSG_CHECKING([if ${CC} supports -fvisibility=hidden])
@@ -241,6 +248,7 @@ AC_SUBST(SIZE32)
 
 AM_CONDITIONAL([FIXED_POINT], [test x$ac_enable_fixed = xyes])
 AM_CONDITIONAL([CUSTOM_MODES], [test x$ac_enable_custom_modes = xyes])
+AM_CONDITIONAL([USE_ENCODER], [test x$ac_enable_encoder = xyes])
 
 dnl subsitutions for the pkg-config files
 if test x$ac_enable_float = xyes; then
@@ -280,6 +288,7 @@ AC_MSG_RESULT([
       Floating point support: ........ ${ac_enable_float}
       Fast float approximations: ..... ${float_approx}
       Fixed point debugging: ......... ${ac_enable_fixed_debug}
+      Encoder support: ............... ${ac_enable_encoder}
       Custom modes: .................. ${ac_enable_custom_modes}
       Assertion checking: ............ ${ac_enable_assertions}
       Fuzzing: ....................... ${ac_enable_fuzzing}

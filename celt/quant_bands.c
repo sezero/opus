@@ -139,6 +139,7 @@ static const unsigned char e_prob_model[4][2][42] = {
 
 static const unsigned char small_energy_icdf[3]={2,1,0};
 
+#ifdef OPUS_ENABLE_ENCODER
 static opus_val32 loss_distortion(const opus_val16 *eBands, opus_val16 *oldEBands, int start, int end, int len, int C)
 {
    int c, i;
@@ -418,6 +419,7 @@ void quant_energy_finalise(const CELTMode *m, int start, int end, opus_val16 *ol
       }
    }
 }
+#endif /* OPUS_ENABLE_ENCODER */
 
 void unquant_coarse_energy(const CELTMode *m, int start, int end, opus_val16 *oldEBands, int intra, ec_dec *dec, int C, int LM)
 {

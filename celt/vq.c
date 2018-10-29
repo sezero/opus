@@ -151,6 +151,7 @@ static unsigned extract_collapse_mask(int *iy, int N, int B)
    return collapse_mask;
 }
 
+#ifdef OPUS_ENABLE_ENCODER
 unsigned alg_quant(celt_norm *X, int N, int K, int spread, int B, ec_enc *enc
 #ifdef RESYNTH
    , opus_val16 gain
@@ -316,6 +317,7 @@ unsigned alg_quant(celt_norm *X, int N, int K, int spread, int B, ec_enc *enc
    RESTORE_STACK;
    return collapse_mask;
 }
+#endif /* OPUS_ENABLE_ENCODER */
 
 /** Decode pulse vector and combine the result with the pitch vector to produce
     the final normalised signal in the current band. */
