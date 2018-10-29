@@ -97,6 +97,22 @@
 #include <math.h>
 #define float2int(x) lrint(x)
 
+#elif defined(__GNUC__) && (defined(__PPC__) || defined(__ppc__) || defined(__powerpc__))
+        static __inline__ long int float2int(register float _x) {
+            int res[2];
+
+            __asm__ __volatile__
+            (
+                "fctiw %1, %1\n\t"
+                "stfd %1, %0"
+                : "=m" (res)    /* Output */
+                : "f" (_x)      /* Input */
+                : "memory"
+            );
+
+            return res[1];
+        }
+
 #elif (defined(_MSC_VER) && _MSC_VER >= 1400) && defined (_M_X64)
         #include <xmmintrin.h>
 
