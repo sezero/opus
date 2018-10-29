@@ -61,7 +61,14 @@
 **      the config.h file.
 */
 
-#if (HAVE_LRINTF)
+#if defined(__MINGW32__) && defined(__x86_64__)
+        #include <xmmintrin.h>
+        static __inline long int float2int(float value)
+        {
+                return _mm_cvtss_si32(_mm_load_ss(&value));
+        }
+
+#elif (HAVE_LRINTF)
 
 /*      These defines enable functionality introduced with the 1999 ISO C
 **      standard. They must be defined before the inclusion of math.h to
