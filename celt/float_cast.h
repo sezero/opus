@@ -128,6 +128,22 @@ static OPUS_INLINE opus_int32 float2int(float x) {return _mm_cvt_ss2si(_mm_set_s
 #include <math.h>
 #define float2int(x) lrint(x)
 
+#elif defined(__GNUC__) && (defined(__PPC__) || defined(__ppc__) || defined(__powerpc__))
+        static __inline__ long int float2int(register float _x) {
+            int res[2];
+
+            __asm__ __volatile__
+            (
+                "fctiw %1, %1\n\t"
+                "stfd %1, %0"
+                : "=m" (res)    /* Output */
+                : "f" (_x)      /* Input */
+                : "memory"
+            );
+
+            return res[1];
+        }
+
 #elif defined(__WATCOMC__) && defined(__386__)
 extern long int lrintf (float);
 #define float2int(x) lrintf(x)
