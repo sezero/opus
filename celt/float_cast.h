@@ -128,6 +128,17 @@ static OPUS_INLINE opus_int32 float2int(float x) {return _mm_cvt_ss2si(_mm_set_s
 #include <math.h>
 #define float2int(x) lrint(x)
 
+#elif defined(__WATCOMC__) && defined(__386__)
+extern long int lrintf (float);
+#define float2int(x) lrintf(x)
+#pragma aux lrintf = \
+    "push  eax" \
+    "fistp dword ptr [esp]" \
+    "pop   eax" \
+    parm [8087] \
+    value [eax] \
+    modify exact [eax];
+
 #else
 
 #if (defined(__GNUC__) && defined(__STDC__) && __STDC__ && __STDC_VERSION__ >= 199901L)

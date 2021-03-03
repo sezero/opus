@@ -70,6 +70,12 @@ extern "C" {
 #  else
 #   define OPUS_EXPORT
 #  endif
+# elif defined(__OS2__) && defined(__WATCOMC__)
+#  if defined(OPUS_BUILD) && defined __SW_BD
+#   define OPUS_EXPORT __declspec(dllexport)
+#  else
+#   define OPUS_EXPORT
+#  endif
 # elif defined(__GNUC__) && defined(OPUS_BUILD)
 #  define OPUS_EXPORT __attribute__ ((visibility ("default")))
 # else
@@ -86,7 +92,13 @@ extern "C" {
 #  endif
 # endif
 
-#if (defined(__GNUC__) && !OPUS_GNUC_PREREQ(3,4))
+#if defined(__WATCOMC__)
+# if (__WATCOMC__ >= 1250 && !defined(__cplusplus))
+#  define OPUS_RESTRICT __restrict
+# else
+#  define OPUS_RESTRICT
+# endif
+#elif (defined(__GNUC__) && !OPUS_GNUC_PREREQ(3,4))
 /* __restrict is broken with gcc < 3.4
    https://gcc.gnu.org/bugzilla/show_bug.cgi?id=6392 */
 # define OPUS_RESTRICT
@@ -106,6 +118,8 @@ extern "C" {
 # if OPUS_GNUC_PREREQ(2,7)
 #  define OPUS_INLINE __inline__
 # elif (defined(_MSC_VER))
+#  define OPUS_INLINE __inline
+# elif (defined(__WATCOMC__))
 #  define OPUS_INLINE __inline
 # else
 #  define OPUS_INLINE

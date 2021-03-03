@@ -76,6 +76,16 @@ static __inline int ec_bsr(unsigned long _x){
 #  define EC_CLZ0    ((int)sizeof(unsigned long)*CHAR_BIT)
 #  define EC_CLZ(_x) (__builtin_clzl(_x))
 # endif
+#elif defined(__WATCOMC__) && defined(__386__)
+# define EC_CLZ0    ((int)sizeof(unsigned long)*CHAR_BIT)
+# define EC_CLZ(_x) (ec_bsr(_x))
+static __inline int ec_bsr (unsigned long);
+#pragma aux ec_bsr = \
+    "bsr eax, eax" \
+    "xor eax, 31" \
+    parm [eax] nomemory \
+    value [eax] \
+    modify exact [eax] nomemory;
 #endif
 
 #if defined(EC_CLZ)
