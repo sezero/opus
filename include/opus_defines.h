@@ -76,7 +76,7 @@ extern "C" {
 #  else
 #   define OPUS_EXPORT
 #  endif
-# elif defined(__GNUC__) && defined(OPUS_BUILD)
+# elif defined(__GNUC__) && defined(OPUS_BUILD) && !defined(OPUS_STATIC)
 #  define OPUS_EXPORT __attribute__ ((visibility ("default")))
 # else
 #  define OPUS_EXPORT
