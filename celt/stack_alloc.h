@@ -49,6 +49,12 @@
 #   include <stdlib.h>
 #  endif
 # endif
+# if defined(__AROS__) && defined(__GNUC__)
+/* bypass __alloca_get_stack_limit() call in alloca.h
+  from old AROS SDKs, directly use __builtin_alloca(). */
+#  undef alloca
+#  define alloca __builtin_alloca
+# endif
 #endif
 
 /**
