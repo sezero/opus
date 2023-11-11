@@ -139,6 +139,14 @@ extern long int lrintf (float);
     value [eax] \
     modify exact [eax];
 
+#elif defined(__GNUC__) && defined(__i386__)
+#define float2int(x) lrintf_inl(x)
+static inline long lrintf_inl (float _x) {
+    long retval;
+    __asm__ __volatile__ ("fistpl %0"  : "=m" (retval) : "t" (_x) : "st");
+    return retval;
+}
+
 #else
 
 #if (defined(__GNUC__) && defined(__STDC__) && __STDC__ && __STDC_VERSION__ >= 199901L)

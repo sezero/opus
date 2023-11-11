@@ -76,6 +76,14 @@ static __inline int ec_bsr(unsigned long _x){
 #  define EC_CLZ0    ((int)sizeof(unsigned long)*CHAR_BIT)
 #  define EC_CLZ(_x) (__builtin_clzl(_x))
 # endif
+#elif defined(__GNUC__) && defined(__i386__)
+# define EC_CLZ0    ((int)sizeof(unsigned long)*CHAR_BIT)
+# define EC_CLZ(_x) (ec_bsr(_x))
+static inline long ec_bsr (unsigned long _v) {
+    unsigned long n;
+    __asm__ __volatile__("bsrl %0,%1" : "+r" (_v),"=rm" (n) : : "memory");
+    return (long)(n ^ 31UL);
+}
 #elif defined(__WATCOMC__) && defined(__386__)
 # define EC_CLZ0    ((int)sizeof(unsigned long)*CHAR_BIT)
 # define EC_CLZ(_x) (ec_bsr(_x))
